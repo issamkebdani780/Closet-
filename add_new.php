@@ -14,6 +14,7 @@ if(isset($_POST['insert'])) {
     $color = $_POST['color'];
     $fabric = $_POST['fabric'];
     $category = $_POST['category'];
+    $score = isset($_POST['score']) ? (int)$_POST['score'] : 0;
 
     if(isset($_FILES['photo']) && $_FILES['photo']['error'] == 0){
         $filename = time().'_'.basename($_FILES['photo']['name']);
@@ -22,11 +23,11 @@ if(isset($_POST['insert'])) {
         $filename = null;
     }
 
-    $stmt = $conn->prepare("INSERT INTO closet_items (user_id, photo, couleur, tissu, categorie) VALUES (?,?,?,?,?)");
+    $stmt = $conn->prepare("INSERT INTO closet_items (user_id, photo, couleur, tissu, categorie, score) VALUES (?,?,?,?,?,?)");
     if($stmt === false){
         die("Erreur prepare : ".$conn->error);
     }
-    $stmt->bind_param("issss", $user_id, $filename, $color, $fabric, $category);
+    $stmt->bind_param("issssi", $user_id, $filename, $color, $fabric, $category, $score);
     $stmt->execute();
     $stmt->close();
 
