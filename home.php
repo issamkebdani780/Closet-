@@ -8,8 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 /* ---------- CONNECTION BDD ---------- */
-$conn = new mysqli("sql303.infinityfree.com", "if0_40611001", "rS3HAXQQqxmE", "if0_40611001_closet");
-if ($conn->connect_error) { die("Erreur: " . $conn->connect_error); }
+include "config.php";
 
 /* ---------- INFO USER ---------- */
 $user_sql = $conn->query("SELECT * FROM users WHERE id = $user_id");
