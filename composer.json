@@ -2,7 +2,7 @@
     "name": "issam/closet",
     "description": "My Closet App",
     "require": {
-        "php": "^8.0",
+        "php": ">=8.2",
         "ext-mysqli": "*"
     }
 }
