@@ -1,0 +1,170 @@
+<?php
+session_start();
+include "config.php"; // connexion à la BDD
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+// Traitement de l'insertion
+if(isset($_POST['insert'])) {
+
+    $color = $_POST['color'];
+    $fabric = $_POST['fabric'];
+    $category = $_POST['category'];
+
+    // Traitement de l'image
+    if(isset($_FILES['photo']) && $_FILES['photo']['error'] == 0){
+        $filename = time().'_'.basename($_FILES['photo']['name']);
+        move_uploaded_file($_FILES['photo']['tmp_name'], 'uploads/'.$filename);
+    } else {
+        $filename = null;
+    }
+
+    // Insertion sans score
+    $stmt = $conn->prepare("INSERT INTO closet_items (user_id, photo, couleur, tissu, categorie) VALUES (?,?,?,?,?)");
+    if($stmt === false){
+        die("Erreur prepare : ".$conn->error);
+    }
+    $stmt->bind_param("issss", $user_id, $filename, $color, $fabric, $category);
+    $stmt->execute();
+    $stmt->close();
+
+    $insert_msg = "✅ تم حفظ القطعة في خزانتك";
+}
+?>
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تحليل القطعة - Closet</title>
+<style>
+body {
+    font-family: Tahoma, sans-serif;
+    background: linear-gradient(135deg, #ffe4ec, #fff5f7);
+    margin:0; padding:0;
+}
+.container {
+    max-width:700px; 
+    margin:40px auto; 
+    background:white; 
+    padding:30px; 
+    border-radius:20px; 
+    box-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
+h2 { text-align:center; color:#d6336c; margin-bottom:20px; }
+label { display:block; font-weight:bold; margin-top:15px; color:#333; }
+input, select { width:100%; padding:12px; margin-top:5px; border-radius:10px; border:1px solid #ddd; font-size:16px; }
+button { width:100%; padding:15px; background:#d6336c; color:white; border:none; border-radius:10px; margin-top:20px; font-size:18px; cursor:pointer; transition:0.3s; }
+button:hover { background:#aa1f53; }
+.question-box { background:#fff0f5; padding:15px; margin-top:15px; border-radius:10px; border:1px solid #ffd1e1; }
+#result { margin-top:20px; font-weight:bold; font-size:18px; text-align:center; padding:12px; border-radius:10px; }
+.result.good { background:#d4f8d4; color:#1b8a1b; }
+.result.bad { background:#ffd4d4; color:#a30000; }
+#insertBtn { display:none; }
+.msg{ color:green; text-align:center; margin-top:15px; font-weight:bold; font-size:18px;}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>تحليل القطعة قبل الشراء</h2>
+
+<form method="POST" enctype="multipart/form-data" id="closetForm">
+
+    <label>صورة القطعة :</label>
+    <input type="file" id="image" name="photo" required>
+
+    <label>اللون :</label>
+    <select id="color" name="color" required>
+        <option value="">اختر اللون</option>
+        <option value="فاتح">فاتح</option>
+        <option value="غامق">غامق</option>
+        <option value="ملون">ملون</option>
+    </select>
+
+    <label>نوع القماش :</label>
+    <select id="fabric" name="fabric" required>
+        <option value="">اختر نوع القماش</option>
+        <option value="قطن">قطن</option>
+        <option value="جينز">جينز</option>
+        <option value="حرير">حرير</option>
+    </select>
+
+    <label>الفئة :</label>
+    <select id="category" name="category" required>
+        <option value="">اختر الفئة</option>
+        <option value="قميص">قميص</option>
+        <option value="فستان">فستان</option>
+        <option value="بنطال">بنطال</option>
+    </select>
+
+    <button type="button" onclick="showQuestions()">التالي</button>
+
+    <div id="questions" style="display:none;">
+        <div class="question-box">
+            <b>1. هل تحتاجين هذا اللون في خزانتك؟</b><br>
+            <input type="checkbox" value="30"> نعم
+            <input type="checkbox" value="0"> لا
+        </div>
+        <div class="question-box">
+            <b>2. هل القطعة تناسب ملابسك الأخرى؟</b><br>
+            <input type="checkbox" value="25"> نعم
+            <input type="checkbox" value="0"> لا
+        </div>
+        <div class="question-box">
+            <b>3. هل ستلبسينها أكثر من 3 مرات؟</b><br>
+            <input type="checkbox" value="20"> نعم
+            <input type="checkbox" value="0"> لا
+        </div>
+        <div class="question-box">
+            <b>4. هل السعر مناسب مقارنة بالجودة؟</b><br>
+            <input type="checkbox" value="15"> نعم
+            <input type="checkbox" value="0"> لا
+        </div>
+        <div class="question-box">
+            <b>5. هل القطعة مريحة؟</b><br>
+            <input type="checkbox" value="10"> نعم
+            <input type="checkbox" value="0"> لا
+        </div>
+
+        <button type="button" onclick="calculate()">تحليل النتيجة</button>
+    </div>
+
+    <div id="result"></div>
+    <input type="hidden" name="score" id="scoreInput">
+    <button type="submit" name="insert" id="insertBtn">💾 إدراج القطعة في الخزانة</button>
+</form>
+
+<div class="msg"><?php if(isset($insert_msg)) echo $insert_msg; ?></div>
+
+<script>
+function showQuestions(){
+    document.getElementById("questions").style.display = "block";
+}
+
+function calculate(){
+    let checkboxes = document.querySelectorAll("#questions input[type='checkbox']:checked");
+    let score = 0;
+    checkboxes.forEach(c => score += parseInt(c.value));
+    document.getElementById("scoreInput").value = score;
+
+    let resultDiv = document.getElementById("result");
+    document.getElementById("insertBtn").style.display = "block";
+
+    if(score >= 60){
+        resultDiv.className = "result good";
+        resultDiv.innerHTML = "✔ نعم، هذه القطعة مناسبة للشراء 👌";
+    } else {
+        resultDiv.className = "result bad";
+        resultDiv.innerHTML = "✖ لا، من الأفضل عدم شراء هذه القطعة 😕";
+    }
+}
+</script>
+</div>
+</body>
+</html>
