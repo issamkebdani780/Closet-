@@ -1,0 +1,8 @@
+{
+    "name": "issam/closet",
+    "description": "My Closet App",
+    "require": {
+        "php": "^8.0",
+        "ext-mysqli": "*"
+    }
+}
