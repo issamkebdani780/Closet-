@@ -1,8 +1,7 @@
 <?php
-// Enable error reporting to find out exactly why it's failing
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-mysqli_report(MYSQLI_REPORT_STRICT | MYSQLI_REPORT_ERROR);
+error_reporting(0);
+ini_set('display_errors', 0);
+// mysqli_report(MYSQLI_REPORT_STRICT | MYSQLI_REPORT_ERROR);
 
 $host = getenv('MYSQLHOST') ?: "sql303.infinityfree.com";
 $user = getenv('MYSQLUSER') ?: "if0_40611001";

@@ -209,7 +209,9 @@ if(count($items)>0){
                 $last_result_ar = "لم يتم التحليل بعد";
         }
 
-        echo '<div class="card" data-categorie="'.$row['categorie'].'" data-couleur="'.$row['couleur'].'" data-tissu="'.$row['tissu'].'" data-gender="'.$row['gender'].'" data-event="'.$row['event'].'" data-id="'.$row['id'].'">';
+        $gender = $row['gender'] ?? '';
+        $event = $row['event'] ?? '';
+        echo '<div class="card" data-categorie="'.$row['categorie'].'" data-couleur="'.$row['couleur'].'" data-tissu="'.$row['tissu'].'" data-gender="'.$gender.'" data-event="'.$event.'" data-id="'.$row['id'].'">';
         echo '<img src="uploads/'.$row['photo'].'" alt="صورة القطعة">';
         echo '<div class="details">';
         echo '<p>الفئة: '.$row['categorie'].'</p>';
