@@ -180,7 +180,7 @@ body {
 if(count($items)>0){
     foreach($items as $row){
         // Récupération de la dernière analyse
-        $stmt_analysis = $conn->prepare("SELECT recommendation FROM closet_analysis WHERE item_id=? ORDER BY date_analyzed DESC LIMIT 1");
+        $stmt_analysis = $conn->prepare("SELECT recommendation FROM closet_analysis WHERE item_id=? ORDER BY date_added DESC LIMIT 1");
         $stmt_analysis->bind_param("i",$row['id']);
         $stmt_analysis->execute();
         $result_analysis = $stmt_analysis->get_result()->fetch_assoc();
